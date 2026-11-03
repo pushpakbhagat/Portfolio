@@ -40,8 +40,8 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: isDev ? [...lanHosts, ...tunnelHosts] : [],
   experimental: {
     serverActions: {
-      // Admin uploads go through Server Actions; files are capped at 10 MB there, plus form overhead.
-      bodySizeLimit: "11mb",
+      // Request bodies stay at Next's 1 MB default: admin uploads go straight from the browser to
+      // Supabase Storage with a one-time token (src/lib/admin/actions.ts → createUpload).
       // Through a tunnel the page's origin differs from the host Next sees, which Next treats as
       // CSRF. Trust the tunnel domains, in development only.
       allowedOrigins: isDev ? tunnelHosts : [],

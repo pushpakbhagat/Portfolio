@@ -294,51 +294,83 @@ const TYPES: Record<string, { ext: string; magic?: number[][] }> = {
 };
 const FOLDERS = new Set(["profile", "resume", "projects", "screenshots", "logos", "icons", "certificates", "documents", "site"]);
 
-/**
- * Uploads one file to Storage. The type is checked against an allow-list, the first bytes must
- * match that type, SVGs may not contain scripts, and the file gets a random name, so nothing about
- * the original file name reaches the URL.
- */
-export async function uploadFile(formData: FormData): Promise<ActionResult<{ path: string; url: string | null }>> {
-  return run(async (db) => {
-    const file = formData.get("file");
-    const folder = String(formData.get("folder") ?? "");
-    const isPrivate = formData.get("private") === "true";
-    const allowPdf = formData.get("accept") === "image+pdf" || folder === "resume" || folder === "documents";
+const EXTENSIONS = Object.fromEntries(Object.entries(TYPES).map(([mime, t]) => [t.ext, mime]));
+const UPLOAD_PATH = /^[a-z]+\/[0-9a-f-]{36}\.[a-z]+$/;
 
-    if (!(file instanceof File) || file.size === 0) throw new UserError("Choose a file to upload.");
+/**
+ * Upload step 1 of 2. Checks the file's declared type, size and destination, then returns a
+ * one-time signed URL so the browser can send the bytes straight to Storage. Files never pass
+ * through this server, so hosting request-size limits (Netlify: about 6 MB) don't apply. The file
+ * gets a random name: nothing about the original file name reaches the URL.
+ */
+export async function createUpload(input: {
+  folder: string;
+  type: string;
+  size: number;
+  accept?: "image" | "image+pdf";
+  isPrivate?: boolean;
+}): Promise<ActionResult<{ bucket: string; path: string; token: string }>> {
+  return run<{ bucket: string; path: string; token: string }>(async (db) => {
+    const { folder, size } = input;
+    const allowPdf = input.accept === "image+pdf" || folder === "resume" || folder === "documents";
     if (!FOLDERS.has(folder)) throw new UserError("Unknown upload location.");
-    if (file.size > MAX_BYTES) throw new UserError("Files must be 10 MB or smaller.");
-    const type = TYPES[file.type];
-    if (!type || (file.type === "application/pdf" && !allowPdf) || (folder === "resume" && file.type !== "application/pdf")) {
+    if (!Number.isFinite(size) || size <= 0) throw new UserError("Choose a file to upload.");
+    if (size > MAX_BYTES) throw new UserError("Files must be 10 MB or smaller.");
+    const type = TYPES[input.type];
+    if (!type || (input.type === "application/pdf" && !allowPdf) || (folder === "resume" && input.type !== "application/pdf")) {
       throw new UserError(folder === "resume" ? "Upload your resume as a PDF." : "Use a PNG, JPG, WebP, AVIF, GIF, SVG or PDF file.");
     }
 
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    if (type.magic && !type.magic.some((sig) => sig.every((b, i) => bytes[i] === b))) {
-      throw new UserError("The file's contents don't match its type.");
-    }
-    if (file.type === "image/svg+xml") {
+    const bucket = input.isPrivate ? PRIVATE_BUCKET : PUBLIC_BUCKET;
+    const path = `${folder}/${randomUUID()}.${type.ext}`;
+    const { data, error } = await db.storage.from(bucket).createSignedUploadUrl(path);
+    if (error || !data) throw new UserError(`Upload failed: ${error?.message ?? "no upload link"}`);
+    return { ok: true, data: { bucket, path, token: data.token } };
+  });
+}
+
+/**
+ * Upload step 2 of 2. Reads back what was stored and checks the bytes really are the declared
+ * type (and that SVGs carry no scripts); anything that fails is deleted. While the file is being
+ * written, the bucket itself also enforces the 10 MB limit and the allowed content types.
+ */
+export async function finishUpload(input: { bucket: string; path: string }): Promise<ActionResult<{ path: string; url: string | null }>> {
+  return run<{ path: string; url: string | null }>(async (db) => {
+    const { bucket, path } = input;
+    if (bucket !== PUBLIC_BUCKET && bucket !== PRIVATE_BUCKET) throw new UserError("Unknown bucket.");
+    if (!UPLOAD_PATH.test(path)) throw new UserError("Invalid path.");
+    const mime = EXTENSIONS[path.split(".").pop()!];
+    const type = mime ? TYPES[mime] : undefined;
+
+    const { data: blob, error } = await db.storage.from(bucket).download(path);
+    if (error || !blob) throw new UserError("The upload didn't arrive. Please try again.");
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+
+    let problem = "";
+    if (!type || bytes.length === 0 || bytes.length > MAX_BYTES) {
+      problem = "The file is empty, too large or of an unknown type.";
+    } else if (type.magic && !type.magic.some((sig) => sig.every((b, i) => bytes[i] === b))) {
+      problem = "The file's contents don't match its type.";
+    } else if (mime === "image/svg+xml") {
       const svg = new TextDecoder().decode(bytes);
       if (!/<svg[\s>]/i.test(svg) || /<script|javascript:|\son\w+\s*=|<foreignObject/i.test(svg)) {
-        throw new UserError("This SVG contains scripts or is not a valid SVG.");
+        problem = "This SVG contains scripts or is not a valid SVG.";
       }
     }
-
-    const path = `${folder}/${randomUUID()}.${type.ext}`;
-    const { error } = await db.storage
-      .from(isPrivate ? PRIVATE_BUCKET : PUBLIC_BUCKET)
-      .upload(path, bytes, { contentType: file.type, cacheControl: "31536000", upsert: false });
-    if (error) throw new UserError(`Upload failed: ${error.message}`);
-    return { ok: true, data: { path, url: isPrivate ? null : assetUrl(path) } };
+    if (problem) {
+      await db.storage.from(bucket).remove([path]);
+      throw new UserError(problem);
+    }
+    return { ok: true, data: { path, url: bucket === PUBLIC_BUCKET ? assetUrl(path) : null } };
   });
 }
 
 /** Removes an uploaded file that was never saved into a record (e.g. the form was cancelled). */
-export async function discardUpload(path: string): Promise<ActionResult> {
+export async function discardUpload(path: string, isPrivate = false): Promise<ActionResult> {
   return run(async (db) => {
-    if (!/^[a-z]+\/[0-9a-f-]{36}\.[a-z]+$/.test(path)) throw new UserError("Invalid path.");
-    await removeFiles(db, [path]);
+    if (!UPLOAD_PATH.test(path)) throw new UserError("Invalid path.");
+    if (isPrivate) await db.storage.from(PRIVATE_BUCKET).remove([path]);
+    else await removeFiles(db, [path]);
     return { ok: true };
   });
 }

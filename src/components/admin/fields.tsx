@@ -11,7 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { uploadFile } from "@/lib/admin/actions";
+import { createUpload, finishUpload } from "@/lib/admin/actions";
+import type { ActionResult } from "@/lib/admin/result";
+import { browserClient } from "@/lib/supabase/browser";
 import type { FieldDef, Option } from "@/lib/admin/entities";
 import { assetUrl } from "@/lib/storage";
 import { cn } from "@/lib/utils";
@@ -358,12 +360,24 @@ export function TagsInput({
   );
 }
 
-export async function uploadToStorage(file: File, folder: string, accept: "image" | "image+pdf" = "image") {
-  const form = new FormData();
-  form.set("file", file);
-  form.set("folder", folder);
-  form.set("accept", accept);
-  return uploadFile(form);
+/**
+ * Uploads a file in three steps: the server approves it and issues a one-time upload token, the
+ * browser sends the bytes straight to Supabase Storage, then the server checks what arrived.
+ */
+export async function uploadToStorage(
+  file: File,
+  folder: string,
+  accept: "image" | "image+pdf" = "image",
+  isPrivate = false,
+): Promise<ActionResult<{ path: string; url: string | null }>> {
+  const started = await createUpload({ folder, type: file.type, size: file.size, accept, isPrivate });
+  if (!started.ok) return started;
+  const { bucket, path, token } = started.data;
+  const { error } = await browserClient()
+    .storage.from(bucket)
+    .uploadToSignedUrl(path, token, file, { contentType: file.type, cacheControl: "31536000" });
+  if (error) return { ok: false, error: `Upload failed: ${error.message}` };
+  return finishUpload({ bucket, path });
 }
 
 /** Upload with preview. Value is the storage path; the file is validated again on the server. */

@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { addDocument, deleteDocument, discardUpload, getDocumentLink, uploadFile } from "@/lib/admin/actions";
+import { addDocument, deleteDocument, discardUpload, getDocumentLink } from "@/lib/admin/actions";
 import type { DocumentRow } from "@/lib/content/types";
 import { PRIVATE_BUCKET } from "@/lib/storage";
+import { uploadToStorage } from "./fields";
 import { ConfirmAction } from "./ui";
 
 /**
@@ -40,11 +41,11 @@ export function DocumentsPanel({
       return;
     }
     startTransition(async () => {
-      const form = new FormData();
-      form.set("file", file);
-      form.set("folder", "documents");
-      form.set("private", String(isPrivate));
-      const uploaded = await uploadFile(form);
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("Files must be 10 MB or smaller.");
+        return;
+      }
+      const uploaded = await uploadToStorage(file, "documents", "image+pdf", isPrivate);
       if (input.current) input.current.value = "";
       if (!uploaded.ok) {
         toast.error(uploaded.error);
@@ -52,7 +53,7 @@ export function DocumentsPanel({
       }
       const saved = await addDocument(kind, parentId, { title, path: uploaded.data.path, isPrivate, mimeType: file.type, size: file.size });
       if (!saved.ok) {
-        if (!isPrivate) await discardUpload(uploaded.data.path);
+        await discardUpload(uploaded.data.path, isPrivate);
         toast.error(saved.error);
         return;
       }
