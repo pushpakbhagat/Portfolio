@@ -103,7 +103,7 @@ function intro() {
 
   const tl = gsap.timeline({ defaults: { ease: "expo.out" }, paused: true });
   if (nonEmpty(chars)) tl.to(chars, { yPercent: 0, duration: 1.25, stagger: 0.028 }, 0);
-  if (nonEmpty(clips)) tl.to(clips, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "expo.inOut" }, 0.15);
+  if (nonEmpty(clips)) tl.to(clips, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "expo.inOut", clearProps: "clipPath" }, 0.15);
   if (nonEmpty(fades)) tl.to(fades, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.07 }, 0.55);
 
   const play = () => tl.play();
@@ -159,7 +159,19 @@ function reveals() {
       clipPath: "inset(100% 0% 0% 0%)",
       duration: 1.4,
       ease: "expo.inOut",
+      clearProps: "clipPath",
       scrollTrigger: { trigger: el, start: "top 85%", once: true },
+    });
+  }
+
+  // Registration marks spin into place.
+  for (const el of gsap.utils.toArray<HTMLElement>("[data-spin]")) {
+    gsap.from(el, {
+      rotate: -180,
+      scale: 0,
+      duration: 1.2,
+      ease: "expo.out",
+      scrollTrigger: { trigger: el, start: "top 92%", once: true },
     });
   }
 

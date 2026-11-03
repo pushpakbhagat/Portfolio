@@ -6,7 +6,21 @@ import { SplitText } from "@/components/motion/split-text";
 
 export function Contact({ profile, socials, index }: { profile: Profile; socials: SocialLink[]; index: string }) {
   return (
-    <section id="contact" className="container-page scroll-mt-20 py-20 md:py-36">
+    <section id="contact" className="container-page relative isolate scroll-mt-20 py-20 md:py-36">
+      {/* Signal rings radiating from behind the heading, under drifting colour light. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="aurora top-[20%] left-[-6%] size-[36vw] max-w-[34rem] bg-signal/45" />
+        <div className="aurora right-[4%] bottom-[0%] size-[28vw] max-w-[26rem] bg-[oklch(0.72_0.11_245)]/50 [animation-delay:-9s]" />
+        <div className="absolute top-[34%] left-[22%] size-[min(70vw,40rem)] -translate-x-1/2 -translate-y-1/2">
+          {[0, 1.8, 3.6].map((delay) => (
+            <span
+              key={delay}
+              className="pulse-ring absolute inset-0 rounded-full border border-signal/50"
+              style={{ animationDelay: `${delay}s` }}
+            />
+          ))}
+        </div>
+      </div>
       <div className="mb-8 flex items-center gap-4 border-t pt-4">
         <p className="eyebrow">§{index} — Contact</p>
       </div>

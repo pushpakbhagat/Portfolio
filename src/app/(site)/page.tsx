@@ -42,6 +42,13 @@ export default async function HomePage() {
     on("contact") && ((i: string) => <Contact key="contact" profile={profile} socials={socials} index={i} />),
   ].filter((s): s is (i: string) => React.JSX.Element => typeof s === "function");
 
+  // One skill (with an icon) from each of the first categories floats around the portrait.
+  const heroChips = home.skillGroups
+    .map((g) => g.skills.find((s) => s.icon_slug || s.icon_path) ?? g.skills[0])
+    .filter(Boolean)
+    .slice(0, 4)
+    .map((s) => ({ name: s.name, slug: s.icon_slug, src: assetUrl(s.icon_path) }));
+
   const person = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -64,6 +71,7 @@ export default async function HomePage() {
         socials={socials}
         hasProjects={on("projects") && home.projects.length > 0}
         hasContact={on("contact")}
+        chips={heroChips}
       />
       {sections.map((render, i) => render(pad(i + 1)))}
     </>

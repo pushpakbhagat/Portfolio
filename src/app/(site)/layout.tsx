@@ -4,16 +4,20 @@ import { MotionProvider } from "@/components/motion/motion-provider";
 import { Preloader } from "@/components/motion/preloader";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
-import { getSiteData } from "@/lib/content/queries";
+import { Nova } from "@/components/site/nova/nova";
+import { novaKnowledge } from "@/lib/content/nova";
+import { getHomeData, getSiteData } from "@/lib/content/queries";
 import { assetUrl } from "@/lib/storage";
 
 export default async function SiteLayout({ children }: LayoutProps<"/">) {
-  const { profile, settings, socials, configured } = await getSiteData();
+  const site = await getSiteData();
+  const { profile, settings, socials, configured } = site;
 
   if (!configured) return <Notice title="Almost there." body="Connect Supabase to show the portfolio: copy .env.example to .env.local, fill in the Supabase keys and run npm run db:setup. The README walks through it." />;
   if (!settings.is_published) return <Notice title="Back soon." body={`${profile.full_name || "This portfolio"} is being updated. Please check back shortly.`} />;
 
   const showContact = settings.sections.contact !== false;
+  const home = await getHomeData();
 
   return (
     <MotionProvider>
@@ -56,6 +60,8 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       </ViewTransition>
       <SiteFooter profile={profile} links={settings.nav_links} socials={socials} footerText={settings.footer_text} />
       <CursorLabel />
+      <Nova knowledge={novaKnowledge(site, home)} />
+      <div aria-hidden className="grain" />
     </MotionProvider>
   );
 }

@@ -26,7 +26,10 @@ export function About({ profile, index }: { profile: Profile; index: string }) {
   ].filter((f) => f.value);
 
   return (
-    <section id="about" className="container-page scroll-mt-20 py-20 md:py-40">
+    <section id="about" className="container-page relative isolate scroll-mt-20 py-20 md:py-40">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="aurora top-[35%] right-[-8%] size-[34vw] max-w-[32rem] bg-signal/30 [animation-delay:-3s]" />
+      </div>
       <SectionHeader index={index} label="About" />
 
       <div className="grid gap-10 md:grid-cols-12 md:gap-14">

@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { Magnetic } from "@/components/motion/magnetic";
+import { NeuralField } from "@/components/motion/neural-field";
 import { SmoothLink } from "@/components/motion/smooth-link";
 import { SplitText } from "@/components/motion/split-text";
 import type { Profile, SocialLink } from "@/lib/content/types";
@@ -8,10 +8,11 @@ import { AVAILABILITY_LABELS } from "@/lib/format";
 import { assetUrl } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 import { HeroLight, LocalTime, ScrambleTitle } from "../hero-parts";
+import { Portrait, type PortraitChip } from "../portrait";
 
-type Props = { profile: Profile; socials: SocialLink[]; hasProjects: boolean; hasContact: boolean };
+type Props = { profile: Profile; socials: SocialLink[]; hasProjects: boolean; hasContact: boolean; chips: PortraitChip[] };
 
-export function Hero({ profile, socials, hasProjects, hasContact }: Props) {
+export function Hero({ profile, socials, hasProjects, hasContact, chips }: Props) {
   const [first, ...rest] = (profile.full_name || "Hello").split(" ");
   const last = rest.join(" ");
   const photo = assetUrl(profile.photo_path);
@@ -25,6 +26,13 @@ export function Hero({ profile, socials, hasProjects, hasContact }: Props) {
   return (
     <section id="top" className="relative overflow-hidden" aria-label="Introduction">
       <div aria-hidden className="bg-hairlines pointer-events-none absolute inset-0" />
+      {/* Colour light drifting behind the portrait side. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="aurora top-[8%] right-[-8%] size-[46vw] max-w-[44rem] bg-signal/60" />
+        <div className="aurora bottom-[-12%] right-[22%] size-[30vw] max-w-[28rem] bg-[oklch(0.72_0.11_245)]/70 [animation-delay:-8s]" />
+        <div className="aurora top-[30%] left-[-10%] size-[26vw] max-w-[24rem] bg-[oklch(0.82_0.1_80)]/60 [animation-delay:-14s]" />
+      </div>
+      <NeuralField />
       {/* Light comets falling along three of the grid lines. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         {[1, 3, 5].map((column, i) => (
@@ -66,36 +74,17 @@ export function Hero({ profile, socials, hasProjects, hasContact }: Props) {
         </div>
 
         {/* Name + portrait */}
-        <div className="flex flex-col justify-end gap-6 lg:grid lg:grid-cols-12 lg:items-end lg:gap-8">
-          <h1 className="text-display max-lg:text-[clamp(4rem,18vw,9rem)] lg:col-span-9">
+        <div className="flex flex-col justify-end gap-4 lg:grid lg:grid-cols-12 lg:items-end lg:gap-8">
+          <h1 className="text-display relative z-10 max-lg:text-[clamp(4rem,18vw,9rem)] lg:col-span-7 lg:pb-4">
             <SplitText text={first} data-intro="chars" className="block" />
             {last && (
               <SplitText text={last} data-intro="chars" className="serif-accent block pl-[0.06em] text-[0.98em]" />
             )}
           </h1>
 
-          <figure
-            data-intro="clip"
-            className="relative order-first aspect-[4/5] w-28 overflow-hidden rounded-sm bg-surface sm:w-36 lg:order-none lg:col-span-3 lg:w-full"
-          >
-            {photo ? (
-              <div data-parallax="14" className="absolute -inset-y-[8%] inset-x-0">
-                <Image
-                  src={photo}
-                  alt={`Portrait of ${profile.full_name}`}
-                  fill
-                  preload
-                  sizes="(min-width: 1024px) 22vw, 144px"
-                  className="object-cover"
-                />
-              </div>
-            ) : (
-              <div className="absolute inset-0 grid place-items-center">
-                <span className="serif-accent text-5xl leading-none text-foreground/80 lg:text-[9vw]">{initials}</span>
-                <span className="eyebrow absolute bottom-3 left-3 hidden lg:block">{profile.full_name}</span>
-              </div>
-            )}
-          </figure>
+          <div data-intro="clip" className="order-first -mb-6 w-44 self-start sm:w-56 lg:order-none lg:col-span-5 lg:-mb-8 lg:w-full lg:max-w-[30rem] lg:justify-self-end">
+            <Portrait src={photo} name={profile.full_name} initials={initials} chips={chips} />
+          </div>
         </div>
 
         {/* Role, intro, actions */}

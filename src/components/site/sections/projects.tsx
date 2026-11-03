@@ -31,7 +31,14 @@ export function Projects({ projects, index }: { projects: ProjectWithRelations[]
   const rest = cards.filter((c) => !featuredSlugs.has(c.slug));
 
   return (
-    <section id="work" className="scroll-mt-20 py-24 md:py-32">
+    // `dark` flips the design tokens for this band only: an ink-coloured section in light mode
+    // (a lifted surface in dark mode) so the work stands apart from the paper around it.
+    <section id="work" className="dark relative isolate scroll-mt-20 overflow-hidden bg-background py-24 text-foreground md:py-32 dark:bg-surface">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="aurora top-[-10%] left-[10%] size-[40vw] max-w-[40rem] bg-signal/50" />
+        <div className="aurora right-[-6%] bottom-[-14%] size-[34vw] max-w-[34rem] bg-[oklch(0.6_0.12_250)]/60 [animation-delay:-11s]" />
+        <div className="bg-dots absolute inset-0 opacity-60" />
+      </div>
       <div className="container-page">
         <SectionHeader
           index={index}

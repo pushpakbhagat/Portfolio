@@ -374,6 +374,135 @@ html.preload .preloader {
   }
 }
 
+/* Atmosphere ------------------------------------------------------------------------------------ */
+
+/* Film grain over the whole site: texture instead of flat colour. */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 45;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 1.2s steps(6) infinite;
+}
+.dark .grain {
+  opacity: 0.07;
+}
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Soft drifting colour light. Place inside a `relative overflow-hidden` parent. */
+.aurora {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.42;
+  pointer-events: none;
+  animation: aurora-drift 22s ease-in-out infinite alternate;
+}
+.dark .aurora {
+  opacity: 0.28;
+}
+@keyframes aurora-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(6%, -8%, 0) scale(1.12); }
+  100% { transform: translate3d(-8%, 6%, 0) scale(0.94); }
+}
+
+/* Dotted paper texture, fading out toward the edges. */
+@utility bg-dots {
+  background-image: radial-gradient(color-mix(in oklch, var(--foreground) 16%, transparent) 1px, transparent 1.4px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 85%);
+}
+
+/* Big outlined numerals behind section headers. */
+@utility text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in oklch, var(--foreground) 14%, transparent);
+}
+
+/* Slow spins and floats for orbit rings and tech chips. */
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes ring-pulse {
+  0% { transform: scale(0.6); opacity: 0; }
+  30% { opacity: 0.55; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+.orbit-spin {
+  animation: spin-slow 38s linear infinite;
+}
+.orbit-spin-reverse {
+  animation: spin-slow 54s linear infinite reverse;
+}
+.float-chip {
+  animation: float-y 6s ease-in-out infinite;
+}
+.pulse-ring {
+  animation: ring-pulse 5.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+
+/* Portrait that dissolves into the page instead of sitting in a box. */
+.portrait-fade {
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 98%);
+}
+.portrait-blend {
+  mask-image: radial-gradient(ellipse 72% 78% at 50% 42%, #000 52%, transparent 88%);
+}
+
+/* Nova, the site guide (src/components/site/nova). */
+@keyframes nova-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+@keyframes nova-talk {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+@keyframes nova-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.045); }
+}
+.nova-eye {
+  animation: nova-blink 4.8s infinite;
+  transform-origin: center;
+}
+.nova-talk span {
+  animation: nova-talk 0.5s ease-in-out infinite;
+}
+.nova-talk span:nth-child(2) { animation-delay: 0.12s; }
+.nova-talk span:nth-child(3) { animation-delay: 0.24s; }
+.nova-breathe {
+  animation: nova-breathe 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain,
+  .aurora,
+  .orbit-spin,
+  .orbit-spin-reverse,
+  .float-chip,
+  .pulse-ring,
+  .nova-eye,
+  .nova-talk span,
+  .nova-breathe {
+    animation: none !important;
+  }
+}
+
 /* Hairline background grid used behind the hero. */
 @utility bg-hairlines {
   background-image: linear-gradient(to right, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px);

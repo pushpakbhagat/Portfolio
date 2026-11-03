@@ -62,7 +62,13 @@ const PROFILE_GROUPS: FormGroup[] = [
   {
     title: "Photo and resume",
     fields: [
-      { name: "photo_path", label: "Profile photo", type: "image", folder: "profile", description: "Portrait orientation (4:5) works best." },
+      {
+        name: "photo_path",
+        label: "Profile photo",
+        type: "image",
+        folder: "profile",
+        description: "Best: a PNG or WebP with the background removed (remove.bg, Canva), so you stand on the page. A normal photo works too; its edges fade out.",
+      },
       { name: "resume_path", label: "Resume (PDF)", type: "image", folder: "resume", accept: "image+pdf", description: "Adds “Download resume” buttons." },
     ],
   },

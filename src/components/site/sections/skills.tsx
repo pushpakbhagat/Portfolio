@@ -25,7 +25,11 @@ export function Skills({ groups, index }: { groups: HomeData["skillGroups"]; ind
         </Marquee>
       </div>
 
-      <div className="container-page">
+      <div className="container-page relative isolate">
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="bg-dots absolute inset-0" />
+          <div className="aurora top-[30%] left-[30%] size-[32vw] max-w-[30rem] bg-signal/35 [animation-delay:-5s]" />
+        </div>
         <SectionHeader
           index={index}
           label="Toolkit"

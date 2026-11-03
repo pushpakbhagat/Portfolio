@@ -63,7 +63,10 @@ function BulletList({ title, items }: { title: string; items: string[] }) {
 
 export function ExperienceSection({ items, index, documents }: { items: ExperienceWithTech[]; index: string; documents: Record<string, DocumentRow[]> }) {
   return (
-    <section id="experience" className="container-page scroll-mt-20 py-24 md:py-32">
+    <section id="experience" className="container-page relative isolate scroll-mt-20 py-24 md:py-32">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="aurora top-[20%] left-[-10%] size-[30vw] max-w-[28rem] bg-[oklch(0.72_0.11_245)]/40 [animation-delay:-6s]" />
+      </div>
       <SectionHeader index={index} label="Experience" title="Where I've" accent="worked." />
       <ol className="relative">
         <TimelineRule />
