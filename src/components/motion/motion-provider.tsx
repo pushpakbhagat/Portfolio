@@ -95,14 +95,15 @@ function intro() {
   if (!chars.length && !clips.length && !fades.length) return;
 
   // Move the start state from CSS to inline styles, then drop the attribute so the CSS fallback
-  // animation can no longer interfere.
-  if (nonEmpty(chars)) gsap.set(chars, { yPercent: 105 });
+  // animation can no longer interfere. GSAP reads the CSS translateY(105%) back as a *pixel* `y`;
+  // zero it explicitly, or that offset stays after `yPercent` returns to 0 (letters stuck low).
+  if (nonEmpty(chars)) gsap.set(chars, { y: 0, yPercent: 105 });
   if (nonEmpty(clips)) gsap.set(clips, { clipPath: "inset(100% 0% 0% 0%)" });
   if (nonEmpty(fades)) gsap.set(fades, { autoAlpha: 0, y: 12 });
   document.querySelectorAll("[data-intro]").forEach((el) => el.removeAttribute("data-intro"));
 
   const tl = gsap.timeline({ defaults: { ease: "expo.out" }, paused: true });
-  if (nonEmpty(chars)) tl.to(chars, { yPercent: 0, duration: 1.25, stagger: 0.028 }, 0);
+  if (nonEmpty(chars)) tl.to(chars, { y: 0, yPercent: 0, duration: 1.25, stagger: 0.028, clearProps: "transform" }, 0);
   if (nonEmpty(clips)) tl.to(clips, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.4, ease: "expo.inOut", clearProps: "clipPath" }, 0.15);
   if (nonEmpty(fades)) tl.to(fades, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.07 }, 0.55);
 
