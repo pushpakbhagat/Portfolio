@@ -288,6 +288,11 @@ html.preload .preloader {
   display: flex;
   animation: preloader-fallback 0.4s 3.4s forwards;
 }
+/* Once the intro script is running it owns the overlay; the timer above is only for when
+   JavaScript never arrives. */
+html.preload.preload-js .preloader {
+  animation: none;
+}
 @keyframes preloader-fallback {
   to {
     opacity: 0;

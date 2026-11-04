@@ -28,12 +28,20 @@ export function Preloader({ name }: { name: string }) {
       const counter = { value: 0 };
 
       const finish = () => {
-        root.classList.remove("preload");
+        root.classList.remove("preload", "preload-js");
         try {
           sessionStorage.setItem("intro-seen", "1");
         } catch {}
         window.dispatchEvent(new Event(INTRO_DONE));
       };
+
+      // A slow start (big download, slow phone): the CSS timer is about to hide the overlay on
+      // its own, so skip the intro rather than replay it late, and go straight to the hero.
+      if (performance.now() > 2800) {
+        finish();
+        return;
+      }
+      root.classList.add("preload-js");
 
       gsap
         .timeline()

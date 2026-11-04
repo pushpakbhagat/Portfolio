@@ -109,7 +109,12 @@ function intro() {
   const play = () => tl.play();
   if (document.documentElement.classList.contains("preload")) {
     window.addEventListener(INTRO_DONE, play, { once: true });
-    return () => window.removeEventListener(INTRO_DONE, play);
+    // Never leave the hero hidden: if the overlay's signal hasn't come after 4s, play anyway.
+    const safety = window.setTimeout(play, 4000);
+    return () => {
+      window.clearTimeout(safety);
+      window.removeEventListener(INTRO_DONE, play);
+    };
   }
   tl.delay(0.1).play();
 }
