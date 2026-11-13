@@ -104,6 +104,9 @@ export const settingsSchema = z.object({
   os_anime: list(60).pipe(z.array(z.string()).max(6, "Up to 6.")),
   os_shouts: list(24).pipe(z.array(z.string()).max(8, "Up to 8 lines.")),
   os_games: list(60).pipe(z.array(z.string()).max(6, "Up to 6 games.")),
+  os_track_path: storagePath,
+  os_film_images: z.array(z.string().trim().max(500)).max(8, "Up to 8 images."),
+  os_anime_images: z.array(z.string().trim().max(500)).max(8, "Up to 8 images."),
   nav_links: z
     .array(
       z.object({

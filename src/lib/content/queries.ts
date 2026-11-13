@@ -78,6 +78,9 @@ export const EMPTY_SETTINGS: SiteSettings = {
   os_anime: [],
   os_shouts: [],
   os_games: [],
+  os_track_path: null,
+  os_film_images: [],
+  os_anime_images: [],
   updated_at: new Date(0).toISOString(),
 };
 

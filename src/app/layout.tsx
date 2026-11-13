@@ -31,7 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
     authors: profile.full_name ? [{ name: profile.full_name }] : undefined,
     creator: profile.full_name || undefined,
     alternates: { canonical: "/" },
-    icons: favicon ? { icon: favicon } : undefined,
+    // public/favicon.png is the fallback until one is uploaded in Settings.
+    icons: { icon: favicon ?? "/favicon.png" },
     openGraph: {
       type: "website",
       url: "/",

@@ -150,18 +150,23 @@ export async function saveSettings(values: unknown): Promise<ActionResult> {
     const parsed = settingsSchema.safeParse(values);
     if (!parsed.success) return { ok: false, error: "Please fix the highlighted fields.", fieldErrors: fieldErrorsOf(parsed.error) };
     const { notification_email, ...settings } = parsed.data;
-    const { data: before } = await db.from("site_settings").select("og_image_path, logo_path, favicon_path, paper_meme_path").eq("id", 1).maybeSingle();
+    const { data: before } = await db.from("site_settings").select("og_image_path, logo_path, favicon_path, paper_meme_path, os_track_path, os_film_images, os_anime_images").eq("id", 1).maybeSingle();
     const [a, b] = await Promise.all([
       db.from("site_settings").upsert({ id: 1, ...settings }),
       db.from("admin_settings").upsert({ id: 1, notification_email }),
     ]);
     check(a.error);
     check(b.error);
-    const old = (before ?? {}) as Record<string, string | null>;
-    await removeFiles(
-      db,
-      (["og_image_path", "logo_path", "favicon_path", "paper_meme_path"] as const).filter((f) => old[f] !== settings[f]).map((f) => old[f]),
-    );
+    const old = (before ?? {}) as Record<string, string | string[] | null>;
+    // Delete files that were replaced or removed, in single-file fields and in image lists.
+    await removeFiles(db, [
+      ...(["og_image_path", "logo_path", "favicon_path", "paper_meme_path", "os_track_path"] as const)
+        .filter((f) => old[f] !== settings[f])
+        .map((f) => old[f] as string | null),
+      ...(["os_film_images", "os_anime_images"] as const).flatMap((f) =>
+        ((old[f] as string[] | null) ?? []).filter((p) => !settings[f].includes(p)),
+      ),
+    ]);
     refreshSite();
     return { ok: true };
   });
@@ -291,11 +296,18 @@ const TYPES: Record<string, { ext: string; magic?: number[][] }> = {
   "image/x-icon": { ext: "ico", magic: [[0x00, 0x00, 0x01, 0x00]] },
   "image/vnd.microsoft.icon": { ext: "ico", magic: [[0x00, 0x00, 0x01, 0x00]] },
   "application/pdf": { ext: "pdf", magic: [[0x25, 0x50, 0x44, 0x46]] },
+  // Audio (off-screen record player). MP3s start with an ID3 tag or a frame sync; M4A carries
+  // its signature four bytes in, so it is checked by declared type and bucket rules only.
+  "audio/mpeg": { ext: "mp3", magic: [[0x49, 0x44, 0x33], [0xff, 0xfb], [0xff, 0xf3], [0xff, 0xf2]] },
+  "audio/ogg": { ext: "ogg", magic: [[0x4f, 0x67, 0x67, 0x53]] },
+  "audio/mp4": { ext: "m4a" },
+  "audio/x-m4a": { ext: "m4a" },
 };
-const FOLDERS = new Set(["profile", "resume", "projects", "screenshots", "logos", "icons", "certificates", "documents", "site"]);
+const FOLDERS = new Set(["profile", "resume", "projects", "screenshots", "logos", "icons", "certificates", "documents", "site", "audio"]);
 
 const EXTENSIONS = Object.fromEntries(Object.entries(TYPES).map(([mime, t]) => [t.ext, mime]));
-const UPLOAD_PATH = /^[a-z]+\/[0-9a-f-]{36}\.[a-z]+$/;
+// Extensions may contain digits (mp3, m4a).
+const UPLOAD_PATH = /^[a-z]+\/[0-9a-f-]{36}\.[a-z0-9]+$/;
 
 /**
  * Upload step 1 of 2. Checks the file's declared type, size and destination, then returns a
@@ -307,7 +319,7 @@ export async function createUpload(input: {
   folder: string;
   type: string;
   size: number;
-  accept?: "image" | "image+pdf";
+  accept?: "image" | "image+pdf" | "audio";
   isPrivate?: boolean;
 }): Promise<ActionResult<{ bucket: string; path: string; token: string }>> {
   return run<{ bucket: string; path: string; token: string }>(async (db) => {
@@ -317,6 +329,11 @@ export async function createUpload(input: {
     if (!Number.isFinite(size) || size <= 0) throw new UserError("Choose a file to upload.");
     if (size > MAX_BYTES) throw new UserError("Files must be 10 MB or smaller.");
     const type = TYPES[input.type];
+    const wantsAudio = input.accept === "audio";
+    if (type && wantsAudio !== input.type.startsWith("audio/")) {
+      throw new UserError(wantsAudio ? "Use an MP3, M4A or OGG audio file." : "Use a PNG, JPG, WebP, AVIF, GIF, SVG or PDF file.");
+    }
+    if (wantsAudio !== (folder === "audio")) throw new UserError("Unknown upload location.");
     if (!type || (input.type === "application/pdf" && !allowPdf) || (folder === "resume" && input.type !== "application/pdf")) {
       throw new UserError(folder === "resume" ? "Upload your resume as a PDF." : "Use a PNG, JPG, WebP, AVIF, GIF, SVG or PDF file.");
     }

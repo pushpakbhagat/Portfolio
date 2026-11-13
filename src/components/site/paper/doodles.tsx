@@ -88,20 +88,29 @@ export function PointingHand() {
   );
 }
 
-/** Hero drawing: a developer with glasses at a laptop, with a mug and a plant. */
+/** Hero drawing: the site's owner at a laptop (tousled hair, rectangular glasses, short beard, tie), with a mug and a plant. */
 export function HeroArt() {
   return (
     <svg viewBox="0 0 380 270" role="img" aria-label="Line drawing of a developer with glasses working at a laptop" className="pp-d pp-art">
       <path d="M14 236h352" />
       <path d="M118 236l14-74h118l14 74zM138 170h106l9 56H129z" />
       <path d="M150 186h30M150 198h52M150 210h22M214 186l8 6-8 6" />
-      <circle cx="191" cy="92" r="38" />
-      <path d="M156 78c2-26 26-40 48-32 14 4 22 14 24 28-10-10-22-12-34-8-12 4-26 6-38 12z" />
-      <circle cx="176" cy="96" r="11" />
-      <circle cx="206" cy="96" r="11" />
-      <path d="M187 96h8M165 94l-10-4M217 94l10-4" />
-      <path d="M182 116c6 5 13 5 19 0" />
-      <path d="M160 126c-22 8-34 22-38 40M222 126c22 8 34 22 38 40M185 130l6 12 6-12M191 142v18" />
+      <path d="M156 86c0 32 14 48 35 48s35-16 35-48" />
+      <path
+        style={{ fill: "currentColor" }}
+        d="M152 88c-4-30 14-54 40-54 12-6 30 0 38 14 8 10 8 26 4 40-4-12-10-20-18-24-10 6-22 4-30-2-8 6-18 12-26 14-4 4-6 8-8 12z"
+      />
+      <path d="M168 36l-5-11M186 31l2-13M204 33l8-11M221 43l11-7" />
+      <rect x="161" y="87" width="26" height="18" rx="4" />
+      <rect x="195" y="87" width="26" height="18" rx="4" />
+      <path d="M187 95h8M161 93l-8-3M221 93l8-3" />
+      <path d="M168 99c3-5 9-5 12 0M202 99c3-5 9-5 12 0M163 81c6-5 13-5 19-1M200 80c6-4 13-4 19 1" />
+      <path style={{ fill: "currentColor" }} d="M178 113c8 3 18 3 26 0-2 12-8 17-13 17s-11-5-13-17z" />
+      <path d="M164 116l2 6M171 124l2 6M180 129l1 6M191 131v6M202 129l-1 6M211 124l-2 6M218 116l-2 6" />
+      <path d="M162 132c-22 8-36 18-40 34M220 134c16 2 28-8 36-26M178 136l13 10 13-10" />
+      <circle cx="260" cy="99" r="9" />
+      <path d="M272 86l7-6M276 99h9M248 84l-3-9" />
+      <path d="M187 146h8l3 14-7 6-7-6zM186 153l10-4" />
       <path d="M292 198h34v24a12 12 0 0 1-12 12h-10a12 12 0 0 1-12-12zM326 204h6a7 7 0 0 1 0 14h-6M302 188c-3-5 3-7 0-12M314 188c-3-5 3-7 0-12" />
       <path d="M44 236v-30h30v30M59 206c0-24-18-28-22-44 16 4 22 18 22 44zM59 206c2-20 16-26 26-34-2 18-12 26-26 34z" />
       <path d="M290 60l-12 12 12 12M320 60l12 12-12 12M310 54l-10 36" />

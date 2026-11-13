@@ -39,7 +39,8 @@ export type FieldDef = {
   | { type: "list"; itemLabel: string }
   | { type: "tags" }
   | { type: "links" }
-  | { type: "image"; folder: string; accept?: "image" | "image+pdf" }
+  | { type: "image"; folder: string; accept?: "image" | "image+pdf" | "audio" }
+  | { type: "images"; folder: string; max: number }
 );
 
 type Row = Record<string, unknown>;

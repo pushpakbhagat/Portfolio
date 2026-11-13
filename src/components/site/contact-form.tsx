@@ -39,7 +39,17 @@ function Field({
 const inputClass =
   "w-full bg-transparent pt-2 pb-4 text-lg tracking-tight outline-none placeholder:text-muted-foreground/60 focus-visible:outline-none";
 
-export function ContactForm() {
+/** Fits a textarea to its text, up to a limit; past that it scrolls. */
+function fitToText(el: HTMLTextAreaElement) {
+  el.style.height = "auto";
+  el.style.height = `${Math.min(el.scrollHeight, 320)}px`;
+}
+
+/**
+ * `compact` (paper design): the message box starts two lines tall and grows as the visitor types,
+ * so an empty form stays short.
+ */
+export function ContactForm({ compact = false }: { compact?: boolean }) {
   const [startedAt] = useState(() => Date.now());
   const [sent, setSent] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -73,7 +83,7 @@ export function ContactForm() {
 
   if (sent) {
     return (
-      <div className="flex min-h-[26rem] flex-col justify-center gap-6 border-y py-12" role="status">
+      <div className={cn("flex flex-col justify-center gap-6 border-y py-12", !compact && "min-h-[26rem]")} role="status">
         <span className="grid size-12 place-items-center rounded-full bg-signal text-signal-foreground">
           <Check className="size-5" />
         </span>
@@ -126,7 +136,8 @@ export function ContactForm() {
       <Field label="Message" htmlFor="contact-message" error={errors.message?.message}>
         <textarea
           id="contact-message"
-          rows={5}
+          rows={compact ? 2 : 5}
+          onInput={compact ? (e) => fitToText(e.currentTarget) : undefined}
           placeholder="Tell me about the role, project or idea…"
           aria-invalid={Boolean(errors.message)}
           aria-describedby={errors.message ? "contact-message-error" : undefined}
@@ -136,7 +147,7 @@ export function ContactForm() {
         />
       </Field>
 
-      <div className="pt-8">
+      <div className={compact ? "pt-4" : "pt-8"}>
         <Magnetic strength={0.25}>
           <button
             type="submit"

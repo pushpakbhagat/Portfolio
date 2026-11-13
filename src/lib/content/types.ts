@@ -98,6 +98,10 @@ export type SiteSettings = {
   os_anime: string[];
   os_shouts: string[];
   os_games: string[];
+  /** Uploaded audio for the record player, and image sets for the film strip and anime section. */
+  os_track_path: string | null;
+  os_film_images: string[];
+  os_anime_images: string[];
   updated_at: string;
 };
 

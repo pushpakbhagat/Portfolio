@@ -199,14 +199,14 @@ export function PaperHome({ site, home, github }: { site: SiteData; home: HomeDa
                 </ul>
               )}
             </div>
-            <ContactForm />
+            <ContactForm compact />
           </div>
         )}
 
         {meme && (
           <figure className="pp-meme" style={{ marginTop: 50 }}>
             <div>
-              <Image src={meme} alt={settings.paper_meme_caption} fill sizes="440px" />
+              <Image src={meme} alt={settings.paper_meme_caption} fill sizes="(min-width: 800px) 720px, 92vw" />
             </div>
             {settings.paper_meme_caption && <figcaption>{settings.paper_meme_caption}</figcaption>}
           </figure>

@@ -489,7 +489,7 @@
 
 /* Footer */
 .pp-foot { padding-block: 50px 60px; text-align: center; }
-.pp-meme { max-width: 440px; margin: 0 auto 26px; }
+.pp-meme { max-width: 720px; margin: 0 auto 26px; }
 .pp-meme div { position: relative; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; background: var(--pp-desk-2); }
 .pp-meme img { object-fit: cover; }
 .pp-meme figcaption { margin-top: 8px; font: 400 17px var(--pp-hand); color: var(--pp-mute); }

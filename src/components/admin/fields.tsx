@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Controller, get, useFieldArray, useFormContext } from "react-hook-form";
-import { ArrowDown, ArrowUp, FileText, ImagePlus, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
+import { ArrowDown, ArrowUp, FileText, ImagePlus, Loader2, Music, Plus, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Prose } from "@/components/site/prose";
 import { Button } from "@/components/ui/button";
@@ -160,6 +160,18 @@ export function FormField({ field, categories = [], technologies = [] }: { field
         <FieldShell {...shell}>
           <LinksInput name={field.name} />
         </FieldShell>
+      );
+    case "images":
+      return (
+        <Controller
+          control={control}
+          name={field.name}
+          render={({ field: f }) => (
+            <FieldShell {...shell}>
+              <ImagesInput value={(f.value as string[]) ?? []} onChange={f.onChange} folder={field.folder} max={field.max} />
+            </FieldShell>
+          )}
+        />
       );
     case "image":
       return (
@@ -367,7 +379,7 @@ export function TagsInput({
 export async function uploadToStorage(
   file: File,
   folder: string,
-  accept: "image" | "image+pdf" = "image",
+  accept: "image" | "image+pdf" | "audio" = "image",
   isPrivate = false,
 ): Promise<ActionResult<{ path: string; url: string | null }>> {
   const started = await createUpload({ folder, type: file.type, size: file.size, accept, isPrivate });
@@ -380,6 +392,24 @@ export async function uploadToStorage(
   return finishUpload({ bucket, path });
 }
 
+/** A set of images: one upload slot per image, plus an empty slot until the limit is reached. */
+export function ImagesInput({ value, onChange, folder, max }: { value: string[]; onChange: (paths: string[]) => void; folder: string; max: number }) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-2">
+      {value.map((path, i) => (
+        <FileInput
+          key={path}
+          value={path}
+          folder={folder}
+          accept="image"
+          onChange={(next) => onChange(next ? value.map((p, n) => (n === i ? next : p)) : value.filter((_, n) => n !== i))}
+        />
+      ))}
+      {value.length < max && <FileInput key="new" value={null} folder={folder} accept="image" onChange={(next) => next && onChange([...value, next])} />}
+    </div>
+  );
+}
+
 /** Upload with preview. Value is the storage path; the file is validated again on the server. */
 export function FileInput({
   value,
@@ -390,14 +420,21 @@ export function FileInput({
   value: string | null;
   onChange: (path: string | null) => void;
   folder: string;
-  accept: "image" | "image+pdf";
+  accept: "image" | "image+pdf" | "audio";
 }) {
   const uploads = useContext(UploadsContext);
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const url = assetUrl(value);
   const isPdf = value?.endsWith(".pdf");
-  const mime = folder === "resume" ? "application/pdf" : accept === "image+pdf" ? "image/*,application/pdf" : "image/*";
+  const isAudio = accept === "audio";
+  const mime = isAudio
+    ? "audio/mpeg,audio/mp4,audio/x-m4a,audio/ogg"
+    : folder === "resume"
+      ? "application/pdf"
+      : accept === "image+pdf"
+        ? "image/*,application/pdf"
+        : "image/*";
 
   async function pick(file: File | undefined) {
     if (!file) return;
@@ -429,6 +466,8 @@ export function FileInput({
       <div className="grid size-16 shrink-0 place-items-center overflow-hidden rounded-sm bg-muted">
         {busy ? (
           <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        ) : isAudio ? (
+          <Music className={cn("size-5", url ? "text-foreground" : "text-muted-foreground")} />
         ) : url && !isPdf ? (
           // eslint-disable-next-line @next/next/no-img-element -- preview of any uploaded format, incl. SVG
           <img src={url} alt="" className="size-full object-cover" />
@@ -455,8 +494,9 @@ export function FileInput({
           )}
         </div>
         <p className="text-xs text-muted-foreground">
-          {folder === "resume" ? "PDF" : accept === "image+pdf" ? "Image or PDF" : "PNG, JPG, WebP, AVIF, GIF or SVG"}, up to 10 MB. Drop a file here.
+          {isAudio ? "MP3, M4A or OGG" : folder === "resume" ? "PDF" : accept === "image+pdf" ? "Image or PDF" : "PNG, JPG, WebP, AVIF, GIF or SVG"}, up to 10 MB. Drop a file here.
         </p>
+        {isAudio && url && <audio controls src={url} className="h-8 w-full max-w-xs" />}
       </div>
       <input ref={input} type="file" accept={mime} className="hidden" onChange={(e) => void pick(e.target.files?.[0])} />
     </div>

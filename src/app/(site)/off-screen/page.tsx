@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Bangers, Rye } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MangaPanel, RecordPlayer, Speedometer } from "@/components/site/paper/off-screen-parts";
 import { getSiteData } from "@/lib/content/queries";
+import { assetUrl } from "@/lib/storage";
 import "@/components/site/paper/off-screen.css";
 
 // Life outside work, kept apart from the portfolio itself. Part of the paper design only.
@@ -69,6 +71,10 @@ export default async function OffScreenPage() {
   const films = settings.os_films.map(pair);
   const games = settings.os_games.map(pair);
   const { os_anime: anime, os_shouts: shouts } = settings;
+  const stills = settings.os_film_images.flatMap((p) => assetUrl(p) ?? []);
+  const posters = settings.os_anime_images.flatMap((p) => assetUrl(p) ?? []);
+  // The strip scrolls by half its width, so it needs two identical runs of at least six frames.
+  const run = stills.length > 0 ? Array.from({ length: Math.max(6, stills.length) }, (_, i) => stills[i % stills.length]) : [];
 
   return (
     <div className={`pp-home pp-wrap os ${comic.variable} ${western.variable}`}>
@@ -84,7 +90,12 @@ export default async function OffScreenPage() {
       <section className="os-sec" aria-labelledby="os-music">
         <p className="pp-lab">side A</p>
         <h2 id="os-music">Always something playing</h2>
-        <RecordPlayer title={settings.os_track_title} artist={settings.os_track_artist} playlists={settings.os_playlists} />
+        <RecordPlayer
+          title={settings.os_track_title}
+          artist={settings.os_track_artist}
+          playlists={settings.os_playlists}
+          src={assetUrl(settings.os_track_path)}
+        />
       </section>
 
       <section className="os-sec" aria-labelledby="os-films">
@@ -92,11 +103,18 @@ export default async function OffScreenPage() {
         <h2 id="os-films">Movie nights</h2>
         <div aria-hidden className="os-strip">
           <div className="os-frames">
-            {Array.from({ length: 12 }, (_, i) => (
-              <span key={i} style={{ background: FRAME_COLORS[i % FRAME_COLORS.length] }}>
-                scene {String((i % 6) + 1).padStart(2, "0")}
-              </span>
-            ))}
+            {/* Two identical halves, so the strip can loop: uploaded stills, else ticket titles, else numbers. */}
+            {run.length > 0
+              ? [...run, ...run].map((src, i) => (
+                  <span key={i} className="os-still">
+                    <Image src={src} alt="" fill sizes="210px" />
+                  </span>
+                ))
+              : Array.from({ length: 12 }, (_, i) => (
+                  <span key={i} style={{ background: FRAME_COLORS[i % FRAME_COLORS.length] }}>
+                    {films.length > 0 ? films[(i % 6) % films.length].text : `scene ${String((i % 6) + 1).padStart(2, "0")}`}
+                  </span>
+                ))}
           </div>
         </div>
         {films.length > 0 && (
@@ -112,11 +130,11 @@ export default async function OffScreenPage() {
         )}
       </section>
 
-      {shouts.length > 0 && (
+      {(shouts.length > 0 || posters.length > 0 || anime.length > 0) && (
         <section className="os-sec" aria-labelledby="os-anime">
           <p className="pp-lab">episode 3</p>
           <h2 id="os-anime">The anime arc</h2>
-          <MangaPanel shouts={shouts} />
+          {(shouts.length > 0 || posters.length > 0) && <MangaPanel shouts={shouts} images={posters} />}
           {anime.length > 0 && (
             <ul className="os-shelf">
               {anime.map((line) => (
