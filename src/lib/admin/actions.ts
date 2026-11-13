@@ -150,7 +150,7 @@ export async function saveSettings(values: unknown): Promise<ActionResult> {
     const parsed = settingsSchema.safeParse(values);
     if (!parsed.success) return { ok: false, error: "Please fix the highlighted fields.", fieldErrors: fieldErrorsOf(parsed.error) };
     const { notification_email, ...settings } = parsed.data;
-    const { data: before } = await db.from("site_settings").select("og_image_path, logo_path, favicon_path").eq("id", 1).maybeSingle();
+    const { data: before } = await db.from("site_settings").select("og_image_path, logo_path, favicon_path, paper_meme_path").eq("id", 1).maybeSingle();
     const [a, b] = await Promise.all([
       db.from("site_settings").upsert({ id: 1, ...settings }),
       db.from("admin_settings").upsert({ id: 1, notification_email }),
@@ -160,7 +160,7 @@ export async function saveSettings(values: unknown): Promise<ActionResult> {
     const old = (before ?? {}) as Record<string, string | null>;
     await removeFiles(
       db,
-      (["og_image_path", "logo_path", "favicon_path"] as const).filter((f) => old[f] !== settings[f]).map((f) => old[f]),
+      (["og_image_path", "logo_path", "favicon_path", "paper_meme_path"] as const).filter((f) => old[f] !== settings[f]).map((f) => old[f]),
     );
     refreshSite();
     return { ok: true };

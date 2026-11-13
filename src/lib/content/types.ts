@@ -54,6 +54,12 @@ export type Profile = {
   updated_at: string;
 };
 
+/** Which public design is shown: the original ("studio") or the hand-drawn paper one. */
+export type SiteDesign = "studio" | "paper";
+
+/** Colour palettes of the paper design (src/components/site/paper/palettes.ts). */
+export type PaperPaletteName = "plum" | "blueprint" | "marigold" | "forest";
+
 export type SiteSettings = {
   site_title: string;
   site_description: string;
@@ -71,6 +77,27 @@ export type SiteSettings = {
   github_show_activity: boolean;
   sections: Partial<Record<SectionKey, boolean>>;
   is_published: boolean;
+  design: SiteDesign;
+  /** Paper design only: headline start, the words that rotate after it, and its extra blocks. */
+  paper_headline: string;
+  paper_swap_words: string[];
+  paper_beliefs: string[];
+  paper_looking_for: string[];
+  paper_meme_path: string | null;
+  paper_meme_caption: string;
+  paper_palette: PaperPaletteName;
+  paper_show_compass: boolean;
+  paper_show_switchboard: boolean;
+  paper_show_off_screen: boolean;
+  /** Off-screen page (paper design). Films and games are "label: text" strings. */
+  os_intro: string;
+  os_track_title: string;
+  os_track_artist: string;
+  os_playlists: string[];
+  os_films: string[];
+  os_anime: string[];
+  os_shouts: string[];
+  os_games: string[];
   updated_at: string;
 };
 

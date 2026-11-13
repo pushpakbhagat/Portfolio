@@ -4,6 +4,7 @@ import { MotionProvider } from "@/components/motion/motion-provider";
 import { Preloader } from "@/components/motion/preloader";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
+import { PaperShell } from "@/components/site/paper/shell";
 import { Nova } from "@/components/site/nova/nova";
 import { novaKnowledge } from "@/lib/content/nova";
 import { getHomeData, getSiteData } from "@/lib/content/queries";
@@ -16,8 +17,16 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
   if (!configured) return <Notice title="Almost there." body="Connect Supabase to show the portfolio: copy .env.example to .env.local, fill in the Supabase keys and run npm run db:setup. The README walks through it." />;
   if (!settings.is_published) return <Notice title="Back soon." body={`${profile.full_name || "This portfolio"} is being updated. Please check back shortly.`} />;
 
-  const showContact = settings.sections.contact !== false;
   const home = await getHomeData();
+  if (settings.design === "paper") {
+    return (
+      <PaperShell site={site} projects={home.projects.map((p) => ({ slug: p.slug, title: p.title }))}>
+        {children}
+      </PaperShell>
+    );
+  }
+
+  const showContact = settings.sections.contact !== false;
 
   return (
     <MotionProvider>

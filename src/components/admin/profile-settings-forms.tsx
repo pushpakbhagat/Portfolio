@@ -117,6 +117,16 @@ const SETTINGS_GROUPS: FormGroup[] = [
     title: "Appearance and navigation",
     fields: [
       {
+        name: "design",
+        label: "Design",
+        type: "select",
+        description: "The look every visitor sees. Paper has its own content below.",
+        options: [
+          { value: "studio", label: "Studio (original)" },
+          { value: "paper", label: "Paper (hand-drawn)" },
+        ],
+      },
+      {
         name: "default_theme",
         label: "Default theme",
         type: "select",
@@ -127,8 +137,50 @@ const SETTINGS_GROUPS: FormGroup[] = [
         ],
       },
       { name: "logo_path", label: "Logo", type: "image", folder: "site", description: "Replaces your name in the top bar. Optional." },
-      { name: "nav_links", label: "Navigation links", type: "links", description: "Use #about, #work, #skills, #experience, #education, #achievements, #github or #contact.", wide: true },
+      { name: "nav_links", label: "Navigation links", type: "links", description: "Use #about, #work, #skills, #experience, #education, #achievements, #github or #contact. Both designs use these; Paper adds its off-screen link itself.", wide: true },
       { name: "footer_text", label: "Footer text", type: "textarea", wide: true },
+    ],
+  },
+  {
+    id: "paper",
+    title: "Paper design",
+    description: "Only shown when the design above is set to Paper. Empty blocks are left out.",
+    fields: [
+      {
+        name: "paper_palette",
+        label: "Colours",
+        type: "select",
+        options: [
+          { value: "plum", label: "Plum and peach" },
+          { value: "blueprint", label: "Blueprint (cobalt and yellow)" },
+          { value: "marigold", label: "Marigold and ink" },
+          { value: "forest", label: "Forest desk" },
+        ],
+      },
+      { name: "paper_show_compass", label: "Show the compass", type: "switch", description: "The mini-map in the corner of large screens." },
+      { name: "paper_show_switchboard", label: "Show the tech switches", type: "switch", description: "Switches above your projects that highlight them by technology." },
+      { name: "paper_headline", label: "Headline", type: "text", placeholder: "Apps that feel", description: "The rotating words follow it." },
+      { name: "paper_swap_words", label: "Rotating words", type: "tags", description: "Up to 6, e.g. fast, simple, alive." },
+      { name: "paper_beliefs", label: "Things I believe in", type: "list", itemLabel: "belief", description: "Short lines, shown as paper scraps.", wide: true },
+      { name: "paper_looking_for", label: "What I look for", type: "list", itemLabel: "item", description: "Up to 3. Visitors tick them off to finish a drawing.", wide: true },
+      { name: "paper_meme_path", label: "Footer image", type: "image", folder: "site", description: "A meme or photo for the end of the page. Optional." },
+      { name: "paper_meme_caption", label: "Footer image caption", type: "text" },
+    ],
+  },
+  {
+    id: "off-screen",
+    title: "Off-screen page",
+    description: "Paper design only: a separate page about life outside work, at /off-screen. Empty blocks are left out.",
+    fields: [
+      { name: "paper_show_off_screen", label: "Show the off-screen page", type: "switch", description: "Off hides the page and every link to it.", wide: true },
+      { name: "os_intro", label: "Intro", type: "textarea", wide: true },
+      { name: "os_track_title", label: "On repeat: track", type: "text", placeholder: "Song title" },
+      { name: "os_track_artist", label: "On repeat: artist", type: "text" },
+      { name: "os_playlists", label: "Playlist labels", type: "list", itemLabel: "label", description: "e.g. coding: lo-fi", wide: true },
+      { name: "os_films", label: "Film tickets", type: "list", itemLabel: "ticket", description: "Write each as label: title, e.g. favourite film: Interstellar", wide: true },
+      { name: "os_anime", label: "Anime notes", type: "list", itemLabel: "note", description: "e.g. watching: One Piece", wide: true },
+      { name: "os_shouts", label: "Manga panel lines", type: "list", itemLabel: "line", description: "Short and loud. The panel cycles through them on click.", wide: true },
+      { name: "os_games", label: "Games", type: "list", itemLabel: "game", description: "Write each as name: note, e.g. GTA: open-world chaos", wide: true },
     ],
   },
   {

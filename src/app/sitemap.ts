@@ -9,6 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!settings.is_published) return [];
   return [
     { url: siteUrl, lastModified: new Date(profile.updated_at), changeFrequency: "monthly", priority: 1 },
+    ...(settings.design === "paper" && settings.paper_show_off_screen ? [{ url: `${siteUrl}/off-screen`, changeFrequency: "monthly" as const, priority: 0.3 }] : []),
     ...projects.map((p) => ({
       url: `${siteUrl}/projects/${p.slug}`,
       lastModified: new Date(p.updated_at),

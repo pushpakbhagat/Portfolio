@@ -59,6 +59,25 @@ export const EMPTY_SETTINGS: SiteSettings = {
   github_show_activity: false,
   sections: {},
   is_published: true,
+  design: "studio",
+  paper_headline: "Apps that feel",
+  paper_swap_words: ["fast", "simple", "alive"],
+  paper_beliefs: [],
+  paper_looking_for: [],
+  paper_meme_path: null,
+  paper_meme_caption: "",
+  paper_palette: "plum",
+  paper_show_compass: true,
+  paper_show_switchboard: true,
+  paper_show_off_screen: true,
+  os_intro: "",
+  os_track_title: "",
+  os_track_artist: "",
+  os_playlists: [],
+  os_films: [],
+  os_anime: [],
+  os_shouts: [],
+  os_games: [],
   updated_at: new Date(0).toISOString(),
 };
 
@@ -80,6 +99,12 @@ function report(label: string, error: { message: string } | null) {
   if (error) console.error(`[content] ${label}: ${error.message}`);
 }
 
+/** Local development only: DESIGN_PREVIEW=paper shows a design without changing the saved setting. */
+function previewDesign(): Partial<SiteSettings> {
+  const preview = process.env.NODE_ENV === "production" ? undefined : process.env.DESIGN_PREVIEW;
+  return preview === "paper" || preview === "studio" ? { design: preview } : {};
+}
+
 export const getSiteData = cache(async (): Promise<SiteData> => {
   if (!isSupabaseConfigured) {
     return { profile: EMPTY_PROFILE, settings: EMPTY_SETTINGS, socials: [], configured: false };
@@ -95,7 +120,7 @@ export const getSiteData = cache(async (): Promise<SiteData> => {
   report("social_links", socials.error);
   return {
     profile: { ...EMPTY_PROFILE, ...profile.data },
-    settings: { ...EMPTY_SETTINGS, ...settings.data },
+    settings: { ...EMPTY_SETTINGS, ...settings.data, ...previewDesign() },
     socials: socials.data ?? [],
     configured: true,
   };

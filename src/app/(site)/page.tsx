@@ -8,6 +8,7 @@ import { Projects } from "@/components/site/sections/projects";
 import { Skills } from "@/components/site/sections/skills";
 import { EducationSection, ExperienceSection } from "@/components/site/sections/timeline";
 import { JsonLd } from "@/components/site/json-ld";
+import { PaperHome } from "@/components/site/paper/home";
 import { getHomeData, getSiteData } from "@/lib/content/queries";
 import type { SectionKey } from "@/lib/content/types";
 import { siteUrl } from "@/lib/env";
@@ -19,7 +20,8 @@ import { assetUrl } from "@/lib/storage";
 export const revalidate = 3600;
 
 export default async function HomePage() {
-  const [{ profile, settings, socials }, home] = await Promise.all([getSiteData(), getHomeData()]);
+  const [site, home] = await Promise.all([getSiteData(), getHomeData()]);
+  const { profile, settings, socials } = site;
   const on = (key: SectionKey) => settings.sections[key] !== false;
   const github = on("github")
     ? await getGithubData(settings.github_username, home.repos, settings.github_show_activity)
@@ -62,6 +64,15 @@ export default async function HomePage() {
     sameAs: socials.filter((s) => s.url.startsWith("http")).map((s) => s.url),
     knowsAbout: home.skillGroups.flatMap((g) => g.skills.map((s) => s.name)),
   };
+
+  if (settings.design === "paper") {
+    return (
+      <>
+        <JsonLd data={person} />
+        <PaperHome site={site} home={home} github={github} />
+      </>
+    );
+  }
 
   return (
     <>
