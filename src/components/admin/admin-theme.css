@@ -1,0 +1,92 @@
+/* Admin look: the Paper design's plum palette. Cream graph-paper workspace, a dark desk sidebar,
+   violet ink and a lime marker. Tokens sit on <html data-admin="paper"> (set before paint by the
+   root layout's inline script) so dialogs and menus rendered outside the page tree match too.
+   The light/dark toggle still works: dark turns the workspace into the desk. */
+
+html[data-admin="paper"] {
+  --background: #f6eee3;
+  --foreground: #1f182a;
+  --surface: #efe5d5;
+  --card: #fcf8f2;
+  --card-foreground: #1f182a;
+  --popover: #fcf8f2;
+  --popover-foreground: #1f182a;
+  --primary: #6a3df0;
+  --primary-foreground: #ffffff;
+  --secondary: #ece1cf;
+  --secondary-foreground: #1f182a;
+  --muted: #ece1cf;
+  --muted-foreground: #5b526b;
+  --accent: #e6dcfb;
+  --accent-foreground: #1f182a;
+  --border: #cfc2ab;
+  --input: #b9ab92;
+  --ring: #6a3df0;
+  --signal: #6a3df0;
+  --signal-foreground: #ffffff;
+  --sidebar: #221a2e;
+  --sidebar-foreground: #f9f5ef;
+  --sidebar-accent: #3a2f55;
+  --sidebar-accent-foreground: #f9f5ef;
+  --sidebar-border: #3a2f55;
+  --admin-grid: rgb(106 61 240 / 0.1);
+  --admin-shadow: #1f182a;
+}
+
+html[data-admin="paper"].dark {
+  --background: #221a2e;
+  --foreground: #f9f5ef;
+  --surface: #191323;
+  --card: #2b2139;
+  --card-foreground: #f9f5ef;
+  --popover: #2b2139;
+  --popover-foreground: #f9f5ef;
+  --primary: #c9f158;
+  --primary-foreground: #1f182a;
+  --secondary: #382d4c;
+  --secondary-foreground: #f9f5ef;
+  --muted: #382d4c;
+  --muted-foreground: #b6acc7;
+  --accent: #41355a;
+  --accent-foreground: #f9f5ef;
+  --border: #4a3e63;
+  --input: #5a4d76;
+  --ring: #c9f158;
+  --signal: #ff9e7a;
+  --signal-foreground: #1f182a;
+  --sidebar: #191323;
+  --sidebar-accent: #382d4c;
+  --sidebar-border: #382d4c;
+  --admin-grid: rgb(178 156 247 / 0.08);
+  --admin-shadow: #0f0b16;
+}
+
+/* Anything on the dark desk (sidebar, sign-in panel) reads in chalk, whatever the mode. */
+.admin-desk {
+  --background: #221a2e;
+  --foreground: #f9f5ef;
+  --muted-foreground: #b6acc7;
+  --border: #3a2f55;
+  --surface: #221a2e;
+  --signal: #ff9e7a;
+  --signal-foreground: #1f182a;
+  background-color: var(--sidebar, #221a2e);
+  color: var(--foreground);
+}
+.admin-desk a[aria-current="page"] { background: #c9f158; color: #1f182a; }
+.admin-desk .eyebrow { font-family: var(--font-pp-hand), cursive; font-size: 1rem; letter-spacing: 0; text-transform: none; color: #c9f158; }
+
+/* Workspace: graph paper. */
+.admin-sheet {
+  background-image: linear-gradient(var(--admin-grid) 1px, transparent 1px), linear-gradient(90deg, var(--admin-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.admin-paper h1 { font-family: var(--font-instrument-serif), Georgia, serif; font-size: 2.5rem; line-height: 1; font-weight: 400; letter-spacing: 0; color: var(--primary); }
+.admin-paper section.bg-card { border: 2px solid var(--foreground); border-radius: 14px; box-shadow: 5px 5px 0 var(--admin-shadow); overflow: hidden; }
+.admin-paper section.bg-card > header { background: color-mix(in srgb, var(--primary) 9%, var(--card)); }
+.admin-paper section.bg-card > header h2 { font-family: var(--font-pp-hand), cursive; font-size: 1.35rem; font-weight: 400; }
+
+/* Sign-in pages */
+.admin-desk .text-headline { font-family: var(--font-instrument-serif), Georgia, serif; }
+.admin-desk .serif-accent { color: #c9f158; }

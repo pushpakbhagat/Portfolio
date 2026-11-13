@@ -118,11 +118,11 @@ export function AdminShell({ email, unread, projects, siteName, children }: Prop
 
   return (
     <div className="min-h-svh bg-background lg:grid lg:grid-cols-[15rem_1fr]">
-      <aside className="sticky top-0 hidden h-svh border-r bg-sidebar lg:block">
+      <aside className="admin-desk sticky top-0 hidden h-svh border-r bg-sidebar lg:block">
         <Sidebar unread={unread} siteName={siteName} />
       </aside>
 
-      <div className="min-w-0">
+      <div className="admin-sheet min-w-0">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/95 px-4 lg:px-8">
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
@@ -130,7 +130,7 @@ export function AdminShell({ email, unread, projects, siteName, children }: Prop
                 <Menu className="size-4" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 bg-sidebar p-0">
+            <SheetContent side="left" className="admin-desk w-64 bg-sidebar p-0">
               <SheetTitle className="sr-only">Admin menu</SheetTitle>
               <Sidebar unread={unread} siteName={siteName} onNavigate={() => setMenuOpen(false)} />
             </SheetContent>

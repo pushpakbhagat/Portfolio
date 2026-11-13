@@ -11,14 +11,14 @@ import type { AuthState } from "@/lib/admin/auth-actions";
 export function AuthShell({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   return (
     <main className="grid min-h-svh lg:grid-cols-2">
-      <div className="relative hidden flex-col justify-between overflow-hidden border-r bg-surface p-10 lg:flex">
+      <div className="admin-desk relative hidden flex-col justify-between overflow-hidden border-r bg-surface p-10 lg:flex">
         <p className="eyebrow">Portfolio · Admin</p>
         <p className="text-headline max-w-md">
           Your work, <span className="serif-accent">kept current.</span>
         </p>
         <p className="eyebrow">Signed-in admins only</p>
       </div>
-      <div className="flex items-center justify-center p-6">
+      <div className="admin-sheet flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
           <p className="mt-2 mb-8 text-sm text-muted-foreground">{description}</p>

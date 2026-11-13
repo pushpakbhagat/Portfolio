@@ -55,7 +55,8 @@ export const viewport: Viewport = {
 // Marks the document before first paint when the visitor allows motion, so entrance animations can
 // start from hidden without a flash (and nothing is hidden for reduced-motion or no-JS visitors).
 // On the first public page of a visit it also turns on the short intro overlay (preloader.tsx).
-const motionScript = `try{var d=document.documentElement;if(matchMedia('(prefers-reduced-motion: no-preference)').matches){d.classList.add('motion-ok');if(!location.pathname.startsWith('/admin')&&!sessionStorage.getItem('intro-seen'))d.classList.add('preload')}}catch(e){}`;
+// Admin pages are marked too, so their own palette (admin-theme.css) applies from the first frame.
+const motionScript = `try{var d=document.documentElement;if(location.pathname.startsWith('/admin'))d.dataset.admin='paper';if(matchMedia('(prefers-reduced-motion: no-preference)').matches){d.classList.add('motion-ok');if(!location.pathname.startsWith('/admin')&&!sessionStorage.getItem('intro-seen'))d.classList.add('preload')}}catch(e){}`;
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const { settings } = await getSiteData();
