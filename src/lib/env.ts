@@ -17,4 +17,16 @@ export const supabaseKey =
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
 
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+/**
+ * Canonical site address (server-side only). On Vercel, a missing or localhost value falls back
+ * to the production domain Vercel provides, so links and the sitemap never point at localhost.
+ */
+function resolveSiteUrl() {
+  const configured = projectOrigin(process.env.NEXT_PUBLIC_SITE_URL);
+  const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  const isLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:|$)/.test(configured);
+  if (vercelHost && (!configured || isLocal)) return `https://${vercelHost}`;
+  return configured || "http://localhost:3000";
+}
+
+export const siteUrl = resolveSiteUrl();
